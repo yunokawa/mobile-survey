@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f3fb">
+<title>親しい友人とのLINEのやりとりについての調査</title>
+<style>
+:root{
+  --bg:#f4f3fb; --card:#fff; --ink:#26242e; --sub:#6b6878; --line:#e2e0ec;
+  --accent:#5b4bdb; --accent-soft:#ece9ff; --warn:#c2410c;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;font-size:16px;line-height:1.75;-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin:0 auto;padding:16px 16px 96px}
+header.top{position:sticky;top:0;z-index:5;background:rgba(244,243,251,.94);backdrop-filter:blur(6px);padding:10px 16px 8px;border-bottom:1px solid var(--line)}
+header.top .inner{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.progress{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress>span{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.count{font-size:13px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:14px 0}
+.card.head{border-top:8px solid var(--accent)}
+h1{font-size:21px;line-height:1.5;margin:0 0 8px}
+h2{font-size:18px;margin:0 0 4px}
+p{margin:.4em 0}
+.sub{color:var(--sub);font-size:14px}
+.req{color:var(--warn);margin-left:4px}
+.q{font-weight:600;margin-bottom:6px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--sub)}
+.hidden{display:none!important}
+ul.plain{padding-left:1.2em;margin:.4em 0}
+
+/* ---- LINE風トーク画面 ---- */
+.phone{max-width:400px;margin:12px auto 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
+.phone .status{display:flex;justify-content:space-between;align-items:center;padding:8px 16px 2px;font-weight:700;font-size:14px;color:#2b2b2b}
+.phone .status .icons{display:flex;gap:6px;align-items:center}
+.phone .status .bars{display:flex;gap:2px;align-items:flex-end;height:11px}
+.phone .status .bars i{display:block;width:3px;background:#2b2b2b;border-radius:1px}
+.phone .status .batt{width:22px;height:11px;border:1.5px solid #2b2b2b;border-radius:3px;padding:1px;position:relative}
+.phone .status .batt::before{content:"";display:block;height:100%;background:#2b2b2b;border-radius:1px}
+.phone .nav{display:flex;justify-content:space-between;align-items:center;padding:6px 14px 8px;color:#8a8a8a;font-size:20px;border-bottom:1px solid #e6e6e6}
+.phone .nav .r{display:flex;gap:14px;font-size:16px}
+.phone .talk{background:#7393c2;padding:14px 12px 22px;display:flex;flex-direction:column;gap:10px;min-height:120px}
+.msg{display:flex;align-items:flex-end;gap:6px}
+.msg.me{justify-content:flex-end}
+.msg .av{width:34px;height:34px;border-radius:50%;background:#eef0f4;flex:none;align-self:flex-start;position:relative;overflow:hidden}
+.msg .av::before{content:"";position:absolute;left:50%;top:7px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#8b8f98}
+.msg .av::after{content:"";position:absolute;left:50%;bottom:-6px;width:24px;height:14px;margin-left:-12px;border-radius:50% 50% 0 0;background:#8b8f98}
+.bub{max-width:68%;padding:7px 12px;border-radius:18px;font-size:15px;line-height:1.5;color:#222;word-break:break-word;position:relative}
+.them .bub{background:#fff}
+.me .bub{background:#7fd765}
+.them .bub::before{content:"";position:absolute;left:-5px;top:4px;border:6px solid transparent;border-right-color:#fff;border-top-color:#fff}
+.me .bub::before{content:"";position:absolute;right:-5px;top:4px;border:6px solid transparent;border-left-color:#7fd765;border-top-color:#7fd765}
+.meta{font-size:10px;color:#eef2f9;line-height:1.3;text-align:right;flex:none}
+.them .meta{text-align:left}
+.phone .input{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #e6e6e6;color:#9a9a9a}
+.phone .input .box{flex:1;border:1px solid #e3e3e3;border-radius:99px;padding:4px 12px;font-size:13px;color:#c2c2c2;background:#f8f8f8}
+.chatimg{display:block;width:100%;max-width:400px;margin:12px auto 0;border-radius:10px;border:1px solid var(--line)}
+
+/* ---- 7段階 ---- */
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.group .item:first-of-type{border-top:0;padding-top:6px}
+.item.err{background:#fff7f3;margin:0 -12px;padding-left:12px;padding-right:12px;border-radius:10px}
+.errmsg{color:var(--warn);font-size:13px;display:none;margin-top:4px}
+.item.err .errmsg{display:block}
+.scale .ends{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:4px;font-weight:600}
+.scale .dots{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.scale label{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-size:12px;color:var(--sub);padding:4px 0;-webkit-tap-highlight-color:transparent}
+.scale input{appearance:none;-webkit-appearance:none;width:30px;height:30px;border:2px solid #b9b4cf;border-radius:50%;margin:0;display:grid;place-items:center;background:#fff;transition:border-color .15s,transform .1s;cursor:pointer}
+.scale input::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--accent);transform:scale(0);transition:transform .15s}
+.scale input:checked{border-color:var(--accent)}
+.scale input:checked::after{transform:scale(1)}
+.scale input:focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px}
+.scale label:active input{transform:scale(.92)}
+
+textarea,input[type=number],input[type=text]{width:100%;font:inherit;padding:10px 12px;border:1px solid #cfcbe0;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:120px;resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.actions{display:flex;gap:10px;justify-content:space-between;margin-top:18px}
+/* ボタン（uiverse.io系の押し込みボタンを簡素化） */
+.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 22px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 0 #3f31b0;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #3f31b0}
+.btn.ghost{background:#fff;color:var(--accent);border:1px solid #cfcbe0;box-shadow:0 4px 0 #dcd8ee}
+.btn.ghost:active{box-shadow:0 1px 0 #dcd8ee}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.wide{flex:1}
+.notice{font-size:14px;border-radius:10px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12}
+
+/* ===== スマホ向けレイアウト ===== */
+html{-webkit-tap-highlight-color:transparent}
+body{touch-action:manipulation;font-size:16px}
+.wrap{max-width:480px;padding:8px 12px calc(104px + env(safe-area-inset-bottom))}
+header.top{padding:calc(8px + env(safe-area-inset-top)) 14px 8px}
+header.top .inner{max-width:480px}
+.card{padding:16px 14px;margin:10px 0;border-radius:16px}
+h1{font-size:20px} h2{font-size:17px}
+.phone,.chatimg{max-width:100%}
+.chatimg{margin-top:10px}
+/* 7段階：指で押しやすく */
+.scale .ends{font-size:13px}
+.scale .dots{gap:2px}
+.scale label{padding:6px 0 2px;border-radius:12px}
+.scale label:active{background:var(--accent-soft)}
+.scale input{width:36px;height:36px}
+.scale input::after{width:16px;height:16px}
+.opt{min-height:52px;padding:12px 14px}
+.opt input{width:22px;height:22px}
+input[type=number],input[type=text],textarea{font-size:16px;min-height:48px}
+/* 画面下に固定のボタン */
+.actions{position:fixed;left:0;right:0;bottom:0;z-index:6;margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(244,243,251,.95);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:10px;justify-content:center}
+.actions>*{max-width:228px}
+.actions .btn{min-height:52px;flex:1;font-size:16px}
+.actions .btn:not(.ghost){flex:2}
+.actions>span{flex:1}
+/* PCで開いたとき */
+.pc{max-width:440px;margin:40px auto;text-align:center}
+.pc #qr{display:inline-block;margin:16px auto;padding:10px;background:#fff;border-radius:12px;border:1px solid var(--line)}
+.pc .url{word-break:break-all;font-size:13px;color:var(--sub)}
+</style>
+</head>
+<body>
+<header class="top hidden" id="bar"><div class="inner"><div class="progress"><span id="pbar"></span></div><div class="count" id="pcount"></div></div></header>
+<main class="wrap" id="app"></main>
+
+<script>
+/* ============================================================
+   設定
+   ============================================================ */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycby56RTum48RGszv08B9YqpxszHPB7msJIG-YHYN3pGglLitVyskMaj-hSak9-hljG9p/exec";          // Apps Script のウェブアプリURL（…/exec）
+const CONTACT  = "ss.mu.fms24@gmail.com";
+const MINUTES  = "20〜25";
+const USE_IMAGES = true;      // true にすると images/ の画像を使う（画像がなければHTMLの会話を表示）
+
+/* ============================================================
+   刺激の定義
+   コード：1文字目＝普段の符号(K/E/T/N)，2文字目＝場面(H/A/S/F)，
+           3文字目＝条件(L維持/D変更/G符号なし)，4文字目＝返事の符号
+   番号はコードの識別用（固定）。実際の提示順は回答者ごとに記録する
+   ============================================================ */
+const BLOCKS = {
+  N:["01NAGN","14NHGN","27NFGN","40NSGN"],
+  K:["02KHLK","03KADE","04KSGN","05KALK","06KFDE","07KHGN","08KFLK","09KSDE","10KAGN","11KSLK","12KHDE","13KFGN"],
+  E:["15EALE","16EFDT","17EHGN","18ESLE","19EADT","20EFGN","21EHLE","22ESDT","23EAGN","24EFLE","25ESGN","26EHDT"],
+  T:["28TSDK","29TFLT","30TAGN","31THDK","32TSLT","33TFGN","34THLT","35TADK","36TSGN","37TFDK","38THGN","39TALT"]
+};
+const BLOCK_KEYS = ["N","K","E","T"];
+
+/* 会話の文 */
+const SCENE = {
+  H:{me:"テストで満点取れた",                    reply:"おめでとう",     long:"おめでとうー",     meEmoji:"💪", replyEmoji:"🥹"},
+  A:{me:"ごめん、今日返すもの持ってくるの忘れた", reply:"なにやってるの", long:"なにやってるのー", meEmoji:"🙏", replyEmoji:"💢"},
+  S:{me:"ライブのチケット外れた",                 reply:"残念",           long:"残念ー",           meEmoji:"🥲", replyEmoji:"😭"},
+  F:{me:"夏休み旅行行こう",                      reply:"楽しみ",         long:"楽しみー",         meEmoji:"👍", replyEmoji:"☺️"}
+};
+/* ふだんの会話：[送り手, 文, 時刻, 絵文字版で付ける絵文字] */
+const USUAL = [
+  ["them","来週のレポート一緒にやらない","12:32","✒️"],
+  ["me",  "いいね",                     "12:32","👍"],
+  ["them","水曜の午後はどうかな",         "12:33","🤔"],
+  ["me",  "空いてるよ",                  "12:33","👌"],
+  ["me",  "レポート終わったらご飯行かない","12:34","🍚"],
+  ["them","行こう",                     "12:34","🫶"]
+];
+function mark(text, sym, emoji, longForm){
+  if(sym==="K") return text+"！";
+  if(sym==="E") return text+emoji;
+  if(sym==="T") return longForm || text+"ー";
+  return text;
+}
+
+/* 質問 */
+const SELF_ITEMS = [ // 自分の印象（上）
+  ["bright","暗い・きつい","明るい・やわらかい"],
+  ["calm","不安になる","安心する"], ["usual","いつもと違う","いつも通り"]
+];
+const OTHER_ITEMS = [ // 相手の印象（関心＋場面ごと）
+  ["interest","関心がない","関心がある"]
+];
+const SCENE_ITEM = {H:["喜んでいない","喜んでいる"],A:["怒っていない","怒っている"],S:["悲しんでいない","悲しんでいる"],F:["楽しみにしていない","楽しみにしている"]};
+
+/* ============================================================
+   状態（途中保存は同じ端末・ブラウザのみ）
+   ============================================================ */
+const KEY = "lineSurvey.v3";
+const params = new URLSearchParams(location.search);
+const CHECK = params.has("check");
+/* スマホのみで回答してもらう（確認モード ?check では制限しない） */
+const IS_PHONE = /iPhone|iPod|Android.+Mobile|Mobile.+Firefox|Windows Phone/i.test(navigator.userAgent)
+  || (matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600);
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+function clearSave(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const scene = id => id.slice(3,4);
+
+/* 提示順を作る：4つのかたまり（普段なし・感嘆符・絵文字・長音）の順をランダムにし，
+   かたまりの中の刺激もランダムに並べる。同じ場面が続かない並びになるまで引き直す。
+   各かたまりの後に自由記述のページを入れる */
+function buildSequence(){
+  const order = shuffle(BLOCK_KEYS);
+  const seq=[]; let prev=null;
+  order.forEach(k=>{
+    let items;
+    for(let t=0;t<10000;t++){
+      items = shuffle(BLOCKS[k]);
+      if(items.every((x,i)=> scene(x)!==(i===0?prev:scene(items[i-1])))) break;
+    }
+    items.forEach(id=>seq.push({type:"stim",id}));
+    seq.push({type:"free",block:k});
+    prev = scene(items[items.length-1]);
+  });
+  return {order, seq};
+}
+
+let st = load();
+if(!st || !st.seq){
+  const b = buildSequence();
+  st = {rid:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()), page:0, a:{}, t:{},
+        started:new Date().toISOString(), order:b.order, seq:b.seq};
+  save();
+}
+const PAGES = ["consent","profile","intro", ...st.seq.map((_,i)=>"q"+i), "submit"];
+const STIM_TOTAL = st.seq.filter(x=>x.type==="stim").length;
+const FRIENDS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function friendName(k){ return "親しい友人" + (k<26 ? FRIENDS[k] : FRIENDS[Math.floor(k/26)-1]+FRIENDS[k%26]); }
+function stimIndex(seqIdx){ return st.seq.slice(0,seqIdx+1).filter(x=>x.type==="stim").length-1; }
+
+/* ============================================================
+   描画
+   ============================================================ */
+const app = document.getElementById("app");
+const el = h=>{ const t=document.createElement("template"); t.innerHTML=h.trim(); return t.content.firstChild; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let enterAt = Date.now();
+
+function phone(clock, msgs){
+  const rows = msgs.map(([who,text,time])=> who==="me"
+    ? `<div class="msg me"><div class="meta">既読<br>${time}</div><div class="bub">${esc(text)}</div></div>`
+    : `<div class="msg them"><div class="av"></div><div class="bub">${esc(text)}</div><div class="meta">${time}</div></div>`).join("");
+  return `<div class="phone" aria-label="LINEのトーク画面">
+    <div class="status"><span>${clock}</span><span class="icons"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px;opacity:.3"></i></span><span class="batt"></span></span></div>
+    <div class="nav"><span>‹</span><span class="r"><span>✆</span><span>≡</span></span></div>
+    <div class="talk">${rows}</div>
+    <div class="input"><span>🖼</span><span class="box">Aa</span><span>☺</span><span>🎙</span></div>
+  </div>`;
+}
+function usualHTML(sym){
+  return phone("12:36", USUAL.map(([who,text,time,emo])=>[who, mark(text,sym,emo), time]));
+}
+function dayHTML(code){
+  const s=SCENE[code[1]];
+  return phone("20:11", [
+    ["me",   mark(s.me, code[0], s.meEmoji), "14:45"],
+    ["them", mark(s.reply, code[3], s.replyEmoji, s.long), "14:51"]
+  ]);
+}
+function withImage(src, fallback){
+  if(!USE_IMAGES) return fallback;
+  const id="f"+Math.random().toString(36).slice(2);
+  return `<img class="chatimg" src="${src}" alt="LINEのトーク画面" onerror="this.replaceWith(document.getElementById('${id}').content.cloneNode(true))"><template id="${id}">${fallback}</template>`;
+}
+function scaleItem(name, left, right){
+  const dots=[1,2,3,4,5,6,7].map(v=>`<label><input type="radio" name="${name}" value="${v}" ${st.a[name]==v?"checked":""} aria-label="${v}">${v}</label>`).join("");
+  return `<div class="item" data-req="${name}"><div class="scale"><div class="ends"><span>1　${esc(left)}</span><span>${esc(right)}　7</span></div><div class="dots">${dots}</div></div><div class="errmsg">選んでください</div></div>`;
+}
+
+function render(){
+  const p = PAGES[st.page];
+  const isQ = p.startsWith("q");
+  const entry = isQ ? st.seq[+p.slice(1)] : null;
+  document.getElementById("bar").classList.toggle("hidden", !isQ);
+  if(isQ){
+    const k = entry.type==="stim" ? stimIndex(+p.slice(1)) : stimIndex(+p.slice(1))+1;
+    document.getElementById("pbar").style.width = (k/STIM_TOTAL*100)+"%";
+    document.getElementById("pcount").textContent = entry.type==="stim" ? (k+1)+" / "+STIM_TOTAL : k+" / "+STIM_TOTAL;
+  }
+  app.innerHTML="";
+  if(p==="consent") app.append(...pageConsent());
+  else if(p==="profile") app.append(...pageProfile());
+  else if(p==="intro") app.append(...pageIntro());
+  else if(p==="submit") app.append(...pageSubmit());
+  else if(entry.type==="stim") app.append(...pageStim(entry.id, stimIndex(+p.slice(1))));
+  else app.append(...pageFree(entry.block));
+  enterAt=Date.now(); window.scrollTo(0,0);
+}
+function nav(validate){
+  const n=el(`<div class="actions">${st.page>0?'<button class="btn ghost" data-act="back">戻る</button>':'<span></span>'}<button class="btn" data-act="next">次へ</button></div>`);
+  n.querySelector('[data-act=next]').onclick=()=>{ if(validate&&!validate()) return; go(1); };
+  const b=n.querySelector('[data-act=back]'); if(b) b.onclick=()=>go(-1);
+  return n;
+}
+function go(d){
+  const p=PAGES[st.page];
+  if(p.startsWith("q")){ const e=st.seq[+p.slice(1)]; if(e.type==="stim") st.t[e.id]=(st.t[e.id]||0)+Math.round((Date.now()-enterAt)/1000); }
+  st.page=Math.max(0,Math.min(PAGES.length-1,st.page+d)); save(); render();
+}
+function bindInputs(root){
+  root.querySelectorAll("input,textarea").forEach(i=>{
+    const h=()=>{ if(i.type==="radio"){ if(i.checked) st.a[i.name]=i.value; } else st.a[i.name]=i.value; const it=i.closest(".item"); if(it) it.classList.remove("err"); save(); };
+    i.addEventListener("change",h); if(i.type!=="radio") i.addEventListener("input",h);
+  });
+}
+function requireAll(root){
+  let first=null;
+  root.querySelectorAll(".item[data-req]").forEach(it=>{
+    const n=it.dataset.req; const ok=st.a[n]!==undefined&&st.a[n]!=="";
+    it.classList.toggle("err",!ok); if(!ok&&!first) first=it;
+  });
+  if(first){ first.scrollIntoView({behavior:"smooth",block:"center"}); return false; }
+  return true;
+}
+
+/* ---------- 各ページ ---------- */
+function pageConsent(){
+  const c=el(`<section class="card head">
+    <h1>親しい友人とのLINEのやりとりについての調査</h1>
+    <p>明治大学 総合数理学部 先端メディアサイエンス学科 小林研究室の佐々木です。本調査では，親しい友人とのLINEのやりとりを見て，どのように感じるかをお尋ねします。</p>
+    <ul class="plain">
+      <li>所要時間は約${MINUTES}分です。</li>
+      <li>回答は任意です。途中でやめても不利益はありません。</li>
+      <li>回答の際にお名前をお伺いしますが，お名前は回答状況の確認のためにのみ使用します。</li>
+      <li>お名前は分析の前に回答から切り離し，回答は個人が特定されない形で処理します。結果は統計的にまとめて公表し，個人が特定されることはありません。</li>
+      <li>回答データは研究目的以外には使用せず，研究担当者が適切に管理します。</li>
+      <li>送信後に回答の取り消しを希望される場合は，下記のお問い合わせ先までご連絡ください（分析開始前まで）。</li>
+      <li>本調査はスマートフォンでの回答をお願いしています。</li>
+    </ul>
+    <p class="sub">お問い合わせ：${CONTACT}</p></section>`);
+  const q=el(`<section class="card"><div class="q">上記の内容に同意して回答しますか？<span class="req">*</span></div>
+    <div class="item" data-req="consent"><div class="opts">
+      <label class="opt"><input type="radio" name="consent" value="同意する" ${st.a.consent==="同意する"?"checked":""}>同意して回答する</label>
+      <label class="opt"><input type="radio" name="consent" value="同意しない" ${st.a.consent==="同意しない"?"checked":""}>同意しない</label>
+    </div><div class="errmsg">選んでください</div></div></section>`);
+  bindInputs(q);
+  return [c,q,nav(()=>{ if(!requireAll(q)) return false; if(st.a.consent!=="同意する"){ endScreen("ご協力ありがとうございました。","同意いただけなかったため，ここで終了です。このページを閉じてください。"); return false;} return true; })];
+}
+function pageProfile(){
+  const c=el(`<section class="card"><h2>あなたについて</h2>
+    <div class="item" data-req="name"><div class="q">お名前<span class="req">*</span></div><input type="text" name="name" autocomplete="name" value="${esc(st.a.name||"")}"><p class="sub">お名前は回答状況の確認のためにのみ使用し，分析の前に回答から切り離して，個人が特定されない形で処理します。</p><div class="errmsg">入力してください</div></div>
+    <div class="item" data-req="age"><div class="q">年齢<span class="req">*</span></div><input type="number" name="age" min="18" max="99" inputmode="numeric" value="${esc(st.a.age||"")}"><div class="errmsg">入力してください</div></div>
+    <div class="item" data-req="gender"><div class="q">性別<span class="req">*</span></div><div class="opts">
+      ${["男性","女性","その他","回答しない"].map(v=>`<label class="opt"><input type="radio" name="gender" value="${v}" ${st.a.gender===v?"checked":""}>${v}</label>`).join("")}
+    </div><div class="errmsg">選んでください</div></div>
+    <div class="item" data-req="lang"><div class="q">あなたの母語は何ですか<span class="req">*</span></div><div class="opts">
+      ${["日本語","その他"].map(v=>`<label class="opt"><input type="radio" name="lang" value="${v}" ${st.a.lang===v?"checked":""}>${v}</label>`).join("")}
+    </div><div class="errmsg">選んでください</div></div></section>`);
+  bindInputs(c);
+  return [c,nav(()=>{ if(!requireAll(c)) return false; if(st.a.lang!=="日本語"){ endScreen("ご協力ありがとうございました。","本調査は日本語を母語とする方を対象としているため，ここで終了です。このページを閉じてください。"); return false;} return true; })];
+}
+function pageIntro(){
+  return [el(`<section class="card head"><h2>回答のしかた</h2>
+    <p>これから，あなたと親しい友人とのLINEのやりとりを${STIM_TOTAL}回見てもらいます。毎回，<b>ちがう友人</b>とのやりとりです。</p>
+    <p>それぞれ，まず「ふだんの会話」を見て，その友人がどのような人かをイメージしてください。次に「別の日の会話」を見て，<b>最後の友人の返事</b>を受け取ったときにどう感じるかを答えてください。</p>
+    <p>正解はありません。直感でお答えください。途中で閉じても，同じ端末・同じブラウザで開けば続きから回答できます。</p></section>`), nav()];
+}
+function pageStim(id, k){
+  const code=id.slice(2), sc=SCENE_ITEM[code[1]];
+  const c=el(`<div>
+    <section class="card head"><h2>${friendName(k)}</h2>${CHECK?`<div class="code">${id}</div>`:""}</section>
+    <section class="card"><p>以下は親しい友人との<b>ふだんの会話</b>の一例です。</p>${withImage("images/usual_"+code[0]+".png", usualHTML(code[0]))}</section>
+    <section class="card"><p>以下は上記の例とは<b>別の日の会話</b>です。会話を読み終えたら，以降の設問にお答えください。</p>${withImage("images/"+code+".png", dayHTML(code))}</section>
+    <section class="card group"><div class="q">友人の最後の返事を受け取ったとき，<b>あなた</b>はどのように感じますか。最も近いものを選んでください。<span class="req">*</span></div>
+      ${SELF_ITEMS.map(([k2,l,r])=>scaleItem(id+"_"+k2,l,r)).join("")}</section>
+    <section class="card group"><div class="q">友人の最後の返事から，<b>友人</b>はどのような様子だと思いますか。最も近いものを選んでください。<span class="req">*</span></div>
+      ${OTHER_ITEMS.map(([k2,l,r])=>scaleItem(id+"_"+k2,l,r)).join("")}${scaleItem(id+"_scene",sc[0],sc[1])}</section>
+  </div>`);
+  bindInputs(c);
+  return [c, nav(CHECK?null:()=>requireAll(c))];
+}
+function pageFree(block){
+  const name="free_"+block;
+  const c=el(`<section class="card head"><h2>ここまでのやりとりについて</h2>${CHECK?`<div class="code">${name}</div>`:""}
+    <p>ここまでに見た友人たちの返事を受け取って，質問した項目以外に感じたことや気づいたことがあれば，自由にお書きください。（任意）</p>
+    <textarea name="${name}" placeholder="自由にお書きください">${esc(st.a[name]||"")}</textarea></section>`);
+  bindInputs(c);
+  return [c, nav()];
+}
+function pageSubmit(){
+  const c=el(`<section class="card head"><h2>回答はこれで終わりです</h2>
+    <p>「送信する」を押すと回答が送られます。送信後は修正できません。</p>
+    ${ENDPOINT?"":'<p class="notice">送信先がまだ設定されていません（作成者向け：index.html の ENDPOINT を設定してください）。</p>'}
+    <div class="actions"><button class="btn ghost" data-act="back">戻る</button><button class="btn wide" data-act="send">送信する</button></div>
+    <p class="sub" id="msg"></p></section>`);
+  c.querySelector("[data-act=back]").onclick=()=>go(-1);
+  c.querySelector("[data-act=send]").onclick=e=>send(e.currentTarget,c.querySelector("#msg"));
+  return [c];
+}
+function endScreen(title, body){
+  document.getElementById("bar").classList.add("hidden");
+  app.innerHTML=`<section class="card head"><h1>${esc(title)}</h1><p>${esc(body)}</p></section>`;
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   送信：列は番号順（01〜40）に固定。提示順は _pos と block_order に記録
+   ============================================================ */
+function rowData(){
+  const r={timestamp:new Date().toISOString(), respondent_id:st.rid, started:st.started,
+    name:(st.a.name||"").trim(), age:st.a.age||"", gender:st.a.gender||"", lang:st.a.lang||"", block_order:st.order.join("-")};
+  const pos={}; let k=0; st.seq.forEach(x=>{ if(x.type==="stim") pos[x.id]=++k; });
+  const all=BLOCK_KEYS.flatMap(k=>BLOCKS[k]).sort();
+  all.forEach(id=>{
+    [...SELF_ITEMS,...OTHER_ITEMS].forEach(([key])=>{ r[id+"_"+key]=st.a[id+"_"+key]||""; });
+    r[id+"_scene"]=st.a[id+"_scene"]||"";
+    r[id+"_pos"]=pos[id]; r[id+"_sec"]=st.t[id]||"";
+  });
+  BLOCK_KEYS.forEach(b=>{ r["free_"+b]=st.a["free_"+b]||""; });
+  return r;
+}
+async function send(btn,msg){
+  if(!ENDPOINT){ msg.textContent="送信先が未設定のため送信できません。"; return; }
+  btn.disabled=true; msg.textContent="送信中…";
+  try{
+    const res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(rowData())});
+    const j=await res.json(); if(!j.ok) throw new Error(j.error||"error");
+    clearSave(); endScreen("ご協力ありがとうございました。","回答を受け付けました。このページを閉じてください。");
+  }catch(e){ btn.disabled=false; msg.textContent="送信できませんでした。通信環境を確認して，もう一度「送信する」を押してください。"; }
+}
+function pcScreen(){
+  const url = location.href.split("#")[0];
+  app.innerHTML = `<section class="card head pc"><h1>スマートフォンで開いてください</h1>
+    <p>この調査は，スマートフォンでの回答をお願いしています。下のQRコードを読み取るか，このページのURLをスマートフォンで開いてください。</p>
+    <div id="qr"></div><p class="url">${esc(url)}</p></section>`;
+  const s=document.createElement("script");
+  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  s.onload=()=>{ try{ new QRCode(document.getElementById("qr"),{text:url,width:180,height:180}); }catch(e){} };
+  s.onerror=()=>{ const q=document.getElementById("qr"); if(q) q.remove(); };
+  document.head.appendChild(s);
+}
+if(!IS_PHONE && !CHECK) pcScreen(); else render();
+</script>
+</body>
+</html>
